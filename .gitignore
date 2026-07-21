@@ -1,0 +1,4 @@
+.env
+data/
+.codex-work/
+node_modules/
