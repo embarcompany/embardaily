@@ -1,5 +1,6 @@
 const stages = [['não_iniciado', 'Prontos para contato'], ['toque1_enviado', 'Depoimento solicitado'], ['aguardando_resposta', 'Aguardando resposta'], ['depoimento_recebido', 'Depoimento recebido'], ['toque2_enviado', 'Avaliação Google'], ['toque3_enviado', 'Autorização Instagram'], ['revisao_manual', 'Revisar manualmente'], ['concluido', 'Concluídos']];
 let contacts = [];
+document.querySelector('header .actions').insertAdjacentHTML('afterbegin', '<a class="back" href="/novo-embarque">Novo embarque</a>');
 const board = document.querySelector('#board'), summary = document.querySelector('#summary'), dialog = document.querySelector('#detail'), detail = document.querySelector('#detail-content');
 const stageName = status => stages.find(([id]) => id === status)?.[1] || status || 'Prontos para contato';
 

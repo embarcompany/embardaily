@@ -48,3 +48,7 @@ O job é idempotente: atualiza o estado somente após um envio bem-sucedido. Cad
 - A confirmação da avaliação leva ao Toque 3; autorização `sim`, `não` ou `sim_sem_identificação` conclui o fluxo.
 
 Abra `http://IP-DA-VPS:3000` para o kanban. O quadro permite buscar clientes, abrir detalhes e mover manualmente uma etapa; a planilha continua sendo a fonte de verdade. Antes do primeiro envio real, execute o job com uma planilha/número de teste e confira o log de auditoria.
+
+## Formulário de novo embarque
+
+Use `http://IP-DA-VPS:3000/novo-embarque` para registrar um novo caso. O formulário aceita um resumo como `TCVIA - GUILHERME MAYER - CWBxGRUxMIA 15/07/26 - P: 1871 🐶: Parafina`, preenche os campos identificáveis, permite cadastrar quantos pets forem necessários e anexa fotos/vídeos. Ao concluir, cria a linha na aba `Embarques` com estado `não_iniciado`; os arquivos seguem para a pasta individual do Drive.

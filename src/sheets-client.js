@@ -50,5 +50,12 @@ export class SheetsClient {
     if (!data.length) return;
     await this.request(`/values:batchUpdate`, { method: "POST", body: JSON.stringify({ valueInputOption: "USER_ENTERED", data }) });
   }
+  async append(fields) {
+    const rows = await this.rows();
+    const headers = Object.keys(rows[0] || {}).filter((key) => key !== "_rowNumber");
+    const range = encodeURIComponent(sheetRange(this.config.sheetTab, "A:AZ"));
+    await this.request(`/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, { method: "POST", body: JSON.stringify({ values: [headers.map((header) => fields[header] ?? "")] }) });
+    return (await this.rows()).at(-1);
+  }
   async findByPhone(phone) { return (await this.rows()).find((row) => String(row.Contato || "").replace(/\D/g, "") === phone); }
 }
