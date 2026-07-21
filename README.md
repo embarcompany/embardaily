@@ -20,6 +20,8 @@ O painel mostra o número de clientes **ainda não contatados** e oferece um fil
 
 Em cada cartão, abra o detalhe para enviar fotos ou vídeos. Se o cliente ainda não tiver `Pasta no Drive`, o CRM cria uma pasta com o nome do tutor e pet, grava o link na planilha e envia o arquivo para lá. Compartilhe a pasta mãe definida em `GOOGLE_DRIVE_PARENT_FOLDER_ID` com a service account como **Editor**.
 
+As pastas seguem a estrutura `Pasta mãe → mês do embarque → resumo do embarque`. Exemplo: `07 - julho 2026/TCVIA - GUILHERME MAYER - CWBxGRUxMIA15/07/26 - P: 1871 🐶: Parafina`.
+
 ## Configuração
 
 1. Copie `.env.example` para `.env` e preencha as variáveis. Não versione `.env`.

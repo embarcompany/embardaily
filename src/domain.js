@@ -5,7 +5,7 @@ export const STATUS = Object.freeze({
   ERROR: "erro_envio", REVIEW_MANUAL: "revisao_manual", OPTED_OUT: "opt_out",
 });
 
-export const EMBARDAILY_COLUMNS = ["status_embardaily", "data_toque1", "data_resposta_toque1", "texto_depoimento", "data_toque2", "avaliacao_confirmada", "data_toque3", "autorizacao_instagram", "tentativas_lembrete", "erro_log"];
+export const EMBARDAILY_COLUMNS = ["status_embardaily", "data_toque1", "data_resposta_toque1", "texto_depoimento", "data_toque2", "avaliacao_confirmada", "data_toque3", "autorizacao_instagram", "tentativas_lembrete", "erro_log", "resumo_embarque"];
 export const TERMINAL = new Set([STATUS.COMPLETE, STATUS.NO_RESPONSE, STATUS.OPTED_OUT]);
 
 export function normalizePhone(value) {

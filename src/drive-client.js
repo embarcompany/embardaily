@@ -12,9 +12,20 @@ export class DriveClient {
     if (!response.ok) throw new Error(`Google Drive ${response.status}: ${await response.text()}`);
     return response.json();
   }
-  async createFolder(name) {
-    const parents = this.config.driveParentFolderId ? [this.config.driveParentFolderId] : undefined;
+  async createFolder(name, parent = null) {
+    const parents = parent ? [parent] : this.config.driveParentFolderId ? [this.config.driveParentFolderId] : undefined;
     return this.request(DRIVE_FILES, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, mimeType: "application/vnd.google-apps.folder", parents }) });
+  }
+  async findFolder(name, parent) {
+    const escaped = name.replace(/'/g, "\\'"); const query = encodeURIComponent(`name = '${escaped}' and mimeType = 'application/vnd.google-apps.folder' and '${parent}' in parents and trashed = false`);
+    const result = await this.request(`${DRIVE_FILES}?q=${query}&fields=files(id,name)&pageSize=1`); return result.files?.[0] || null;
+  }
+  monthName(value) {
+    let date = new Date(value);
+    if (/^\d+(\.\d+)?$/.test(String(value))) date = new Date(Date.UTC(1899, 11, 30) + Number(value) * 86400000);
+    if (Number.isNaN(date.getTime())) { const match = String(value).match(/(\d{2})\/(\d{2})\/(\d{4})/); if (match) date = new Date(`${match[3]}-${match[2]}-${match[1]}T12:00:00Z`); }
+    if (Number.isNaN(date.getTime())) return "Sem mês definido";
+    return `${String(date.getUTCMonth() + 1).padStart(2, "0")} - ${date.toLocaleString("pt-BR", { month: "long", timeZone: "UTC" })} ${date.getUTCFullYear()}`;
   }
   async upload({ folderId: parent, filename, mimeType, content }) {
     const boundary = `embardaily-${Date.now()}`;
@@ -26,7 +37,10 @@ export class DriveClient {
   async ensureFolder(row, sheets) {
     const existing = folderId(row["Pasta no Drive"]);
     if (existing) return existing;
-    const folder = await this.createFolder(`${row.Cliente || "Cliente"} - ${row.Pet || "Pet"}`);
+    if (!this.config.driveParentFolderId) throw new Error("Defina GOOGLE_DRIVE_PARENT_FOLDER_ID para organizar os arquivos no Drive.");
+    const month = this.monthName(row["Data do embarque"]); const monthFolder = await this.findFolder(month, this.config.driveParentFolderId) || await this.createFolder(month, this.config.driveParentFolderId);
+    const name = row.resumo_embarque || `${row.Cliente || "Cliente"} - ${row.Pet || "Pet"}`;
+    const folder = await this.createFolder(name, monthFolder.id);
     await sheets.update(row._rowNumber, { "Pasta no Drive": `https://drive.google.com/drive/folders/${folder.id}` });
     return folder.id;
   }

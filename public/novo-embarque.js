@@ -1,4 +1,5 @@
 document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="/form.css">');
+document.querySelector('#summary').name = 'summary';
 const form = document.querySelector('#shipment-form'), status = document.querySelector('#status'), pets = document.querySelector('#pets');
 function petRow() { const row = document.createElement('div'); row.className = 'pet-row'; row.innerHTML = '<input name="petName" placeholder="Nome do pet" required><input name="petBreed" placeholder="Espécie / raça"><button type="button" class="remove">Remover</button>'; row.querySelector('.remove').onclick = () => row.remove(); return row; }
 document.querySelector('#add-pet').onclick = () => pets.append(petRow());
