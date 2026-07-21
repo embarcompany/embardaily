@@ -22,8 +22,17 @@ export class SupabaseClient {
       const [pet] = await this.request("pets", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ name }) });
       await this.request("shipment_pets", { method: "POST", body: JSON.stringify({ shipment_id: shipment.id, pet_id: pet.id }) });
     }
-    await this.request("campaign_cases", { method: "POST", body: JSON.stringify({ shipment_id: shipment.id, initial_contact_due_at: new Date(`${input.date}T12:00:00Z`).toISOString() }) });
+    const due = new Date(`${input.date}T12:00:00Z`); due.setUTCDate(due.getUTCDate() + config.toque1DelayDays);
+    await this.request("campaign_cases", { method: "POST", body: JSON.stringify({ shipment_id: shipment.id, initial_contact_due_at: due.toISOString(), next_action_at: due.toISOString(), next_action_label: "Aguardar envio automático do contato inicial" }) });
     return shipment;
   }
   updateStatus(id, status) { return this.request(`campaign_cases?shipment_id=eq.${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ status }) }); }
+  async uploadMedia(shipmentId, file) {
+    const safeName = file.filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-");
+    const storagePath = `${shipmentId}/${Date.now()}-${safeName}`;
+    const response = await fetch(`${config.supabaseUrl.replace(/\/$/, "")}/storage/v1/object/embardaily-media/${encodeURIComponent(storagePath).replace(/%2F/g, "/")}`, { method: "POST", headers: { apikey: config.supabaseServiceRoleKey, authorization: `Bearer ${config.supabaseServiceRoleKey}`, "content-type": file.contentType, "x-upsert": "false" }, body: file.content });
+    if (!response.ok) throw new Error(`Supabase Storage: ${await response.text()}`);
+    await this.request("media_assets", { method: "POST", body: JSON.stringify({ shipment_id: shipmentId, storage_path: storagePath, original_name: file.filename, content_type: file.contentType, size_bytes: file.content.length }) });
+    return { storagePath, name: file.filename };
+  }
 }

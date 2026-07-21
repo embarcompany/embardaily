@@ -1,21 +1,21 @@
 const stages = [
-  ['não_iniciado', 'Contato inicial', 'Ainda não enviado'],
-  ['toque1_enviado', 'Aguardando resposta', 'Mensagem inicial enviada'],
+  ['nao_iniciado', 'Contato inicial', 'Ainda não enviado'],
+  ['toque_1_enviado', 'Aguardando resposta', 'Mensagem inicial enviada'],
   ['aguardando_resposta', 'Aguardando resposta', 'Acompanhar retorno'],
   ['depoimento_recebido', 'Depoimento recebido', 'Pronto para avaliação'],
-  ['toque2_enviado', 'Avaliação Google', 'Aguardando confirmação'],
-  ['toque3_enviado', 'Instagram', 'Aguardando autorização'],
+  ['toque_2_enviado', 'Avaliação Google', 'Aguardando confirmação'],
+  ['toque_3_enviado', 'Instagram', 'Aguardando autorização'],
   ['revisao_manual', 'Revisar agora', 'Precisa de uma pessoa'],
   ['concluido', 'Concluídos', 'Fluxo finalizado'],
 ];
-const aliases = { nao_iniciado: 'não_iniciado', 'toque_1_enviado': 'toque1_enviado', 'toque_2_enviado': 'toque2_enviado', 'toque_3_enviado': 'toque3_enviado', toque_1_enviado: 'toque1_enviado' };
+const aliases = { 'não_iniciado': 'nao_iniciado', toque1_enviado: 'toque_1_enviado', toque2_enviado: 'toque_2_enviado', toque3_enviado: 'toque_3_enviado' };
 let contacts = [];
 const board = document.querySelector('#board');
 const summary = document.querySelector('#summary');
 const dialog = document.querySelector('#detail');
 const detail = document.querySelector('#detail-content');
 const fmt = value => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: String(value).includes('T') ? 'short' : undefined }).format(new Date(value)) : '—';
-const statusOf = contact => aliases[contact.status] || contact.status || 'não_iniciado';
+const statusOf = contact => aliases[contact.status] || contact.status || 'nao_iniciado';
 const stage = contact => stages.find(([id]) => id === statusOf(contact)) || stages[0];
 const esc = text => String(text || '—').replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 
@@ -27,7 +27,7 @@ function contactSignal(contact) {
 }
 function nextAction(contact) {
   if (contact.nextActionLabel) return contact.nextActionLabel;
-  return { 'não_iniciado': 'Enviar contato inicial', toque1_enviado: 'Acompanhar resposta', aguardando_resposta: 'Conferir retorno do tutor', depoimento_recebido: 'Enviar pedido de avaliação', toque2_enviado: 'Aguardar avaliação', toque3_enviado: 'Aguardar autorização', revisao_manual: 'Ler e responder manualmente', concluido: 'Nenhuma ação pendente' }[statusOf(contact)] || 'Revisar caso';
+  return { nao_iniciado: 'A Evolution envia no prazo configurado', toque_1_enviado: 'Acompanhar resposta', aguardando_resposta: 'Conferir retorno do tutor', depoimento_recebido: 'Enviar pedido de avaliação', toque_2_enviado: 'Aguardar avaliação', toque_3_enviado: 'Aguardar autorização', revisao_manual: 'Ler e responder manualmente', concluido: 'Nenhuma ação pendente' }[statusOf(contact)] || 'Revisar caso';
 }
 function renderSummary() {
   const pending = contacts.filter(c => !c.contacted);

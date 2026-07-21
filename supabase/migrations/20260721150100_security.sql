@@ -7,7 +7,6 @@ alter table public.campaign_cases enable row level security;
 alter table public.messages enable row level security;
 alter table public.media_assets enable row level security;
 alter table public.activities enable row level security;
-alter table public.google_sheet_sync_runs enable row level security;
 
 create or replace function public.is_staff()
 returns boolean language sql stable security definer set search_path = public as $$
@@ -25,8 +24,6 @@ create policy "staff manages campaign cases" on public.campaign_cases for all to
 create policy "staff manages messages" on public.messages for all to authenticated using (public.is_staff()) with check (public.is_staff());
 create policy "staff manages media" on public.media_assets for all to authenticated using (public.is_staff()) with check (public.is_staff());
 create policy "staff manages activities" on public.activities for all to authenticated using (public.is_staff()) with check (public.is_staff());
-create policy "admin reads sync runs" on public.google_sheet_sync_runs for select to authenticated using ((select role from public.profiles where id = auth.uid()) = 'admin');
-
 create policy "staff uploads shipment media" on storage.objects for insert to authenticated with check (bucket_id = 'embardaily-media' and public.is_staff());
 create policy "staff reads shipment media" on storage.objects for select to authenticated using (bucket_id = 'embardaily-media' and public.is_staff());
 create policy "staff deletes shipment media" on storage.objects for delete to authenticated using (bucket_id = 'embardaily-media' and public.is_staff());

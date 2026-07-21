@@ -24,6 +24,3 @@ verify_jwt = false
 
 [functions.campaign-dispatch]
 verify_jwt = false
-
-[functions.google-sheets-sync]
-verify_jwt = false

@@ -110,15 +110,6 @@ create table public.activities (
   created_at timestamptz not null default now()
 );
 
-create table public.google_sheet_sync_runs (
-  id uuid primary key default gen_random_uuid(),
-  started_at timestamptz not null default now(),
-  finished_at timestamptz,
-  status text not null default 'running' check (status in ('running', 'success', 'failed')),
-  rows_exported integer not null default 0,
-  error text
-);
-
 create index shipments_customer_id_idx on public.shipments(customer_id);
 create index campaign_cases_due_idx on public.campaign_cases(initial_contact_due_at) where status = 'nao_iniciado';
 create index messages_customer_occurred_idx on public.messages(customer_id, occurred_at desc);
@@ -156,30 +147,6 @@ language sql security definer set search_path = public as $$
    where cc.id = due.id
   returning cc.*;
 $$;
-
--- View exported to Google Sheets: only operational fields, no raw message payloads or file paths.
-create or replace view public.google_sheet_export with (security_invoker = true) as
-select
-  s.id::text as id_embarque,
-  s.external_reference as referencia,
-  s.summary as resumo_embarque,
-  c.full_name as responsavel,
-  c.phone_e164 as whatsapp,
-  c.email,
-  s.origin as origem,
-  s.destination as destino,
-  s.departure_at as data_embarque,
-  s.arrival_at as data_chegada,
-  cc.status::text as status_campanha,
-  cc.initial_contact_sent_at,
-  cc.replied_at,
-  cc.next_action_at,
-  cc.next_action_label,
-  s.drive_folder_url as pasta_drive,
-  c.opt_out_at
-from public.shipments s
-join public.customers c on c.id = s.customer_id
-left join public.campaign_cases cc on cc.shipment_id = s.id;
 
 create or replace view public.crm_kanban with (security_invoker = true) as
 select s.id::text as id, c.full_name as client, c.phone_e164 as phone, s.company, s.destination,
