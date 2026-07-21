@@ -1,0 +1,29 @@
+project_id = "embardaily"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 17
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://crm.seudominio.com"]
+
+[storage]
+enabled = true
+
+[functions.evolution-webhook]
+verify_jwt = false
+
+[functions.campaign-dispatch]
+verify_jwt = false
+
+[functions.google-sheets-sync]
+verify_jwt = false

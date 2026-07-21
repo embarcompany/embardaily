@@ -11,6 +11,9 @@ export function loadEnv(path = ".env") {
 loadEnv();
 
 export const config = {
+  supabaseUrl: process.env.SUPABASE_URL || "",
+  supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY || "",
+  supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   sheetId: process.env.GOOGLE_SHEET_ID,
   sheetTab: process.env.GOOGLE_SHEET_TAB || "Embarques",
   serviceAccountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,

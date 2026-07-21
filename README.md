@@ -1,5 +1,7 @@
 # EmbarDaily
 
+> Arquitetura atual: Supabase é a fonte oficial do CRM. Google Sheets é uma exportação operacional unidirecional. Veja o [guia de implantação Supabase](docs/SUPABASE_SETUP.md).
+
 Automação pós-embarque para solicitar depoimentos, avaliação no Google e autorização de uso no Instagram. A fonte de verdade é a aba `Embarques` de uma planilha Google Sheets.
 
 ## Canal escolhido
