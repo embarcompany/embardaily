@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node src/server.js",
     "run:campaign": "node src/run-campaign.js",
+    "check:integrations": "node src/check-integrations.js",
     "test": "node --test"
   }
 }

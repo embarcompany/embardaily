@@ -24,6 +24,20 @@ export class EvolutionWhatsAppClient {
     if (!response.ok) throw new Error(`Evolution API ${response.status}: ${await response.text()}`);
     return response.json();
   }
+  async connectionState() {
+    const url = this.env.EVOLUTION_API_URL?.replace(/\/$/, ""); const { EVOLUTION_INSTANCE_NAME: instance, EVOLUTION_API_KEY: key } = this.env;
+    if (!url || !instance || !key) throw new Error("Credenciais Evolution API ausentes.");
+    const response = await fetch(`${url}/instance/connectionState/${encodeURIComponent(instance)}`, { headers: { apikey: key } });
+    if (!response.ok) throw new Error(`Evolution API ${response.status}: ${await response.text()}`);
+    return response.json();
+  }
+  async configureWebhook(webhookUrl) {
+    const url = this.env.EVOLUTION_API_URL?.replace(/\/$/, ""); const { EVOLUTION_INSTANCE_NAME: instance, EVOLUTION_API_KEY: key } = this.env;
+    if (!url || !instance || !key) throw new Error("Credenciais Evolution API ausentes.");
+    const response = await fetch(`${url}/webhook/set/${encodeURIComponent(instance)}`, { method: "POST", headers: { apikey: key, "content-type": "application/json" }, body: JSON.stringify({ enabled: true, url: webhookUrl, events: ["MESSAGES_UPSERT", "MESSAGES_UPDATE", "CONNECTION_UPDATE"] }) });
+    if (!response.ok) throw new Error(`Evolution API ${response.status}: ${await response.text()}`);
+    return response.json();
+  }
 }
 
 export function createWhatsAppClient(provider) { return provider === "meta" ? new MetaWhatsAppClient() : new EvolutionWhatsAppClient(); }

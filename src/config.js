@@ -21,5 +21,6 @@ export const config = {
   reviewUrl: process.env.GOOGLE_REVIEW_URL || "",
   provider: process.env.WHATSAPP_PROVIDER || "evolution",
   port: Number(process.env.PORT || 3000),
+  appBaseUrl: process.env.APP_BASE_URL?.replace(/\/$/, ""),
   auditLogPath: process.env.AUDIT_LOG_PATH || "./data/embardaily-audit.jsonl",
 };
