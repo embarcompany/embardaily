@@ -1,18 +1,84 @@
-const stages = [['não_iniciado', 'Prontos para contato'], ['toque1_enviado', 'Depoimento solicitado'], ['aguardando_resposta', 'Aguardando resposta'], ['depoimento_recebido', 'Depoimento recebido'], ['toque2_enviado', 'Avaliação Google'], ['toque3_enviado', 'Autorização Instagram'], ['revisao_manual', 'Revisar manualmente'], ['concluido', 'Concluídos']];
+const stages = [
+  ['não_iniciado', 'Contato inicial', 'Ainda não enviado'],
+  ['toque1_enviado', 'Aguardando resposta', 'Mensagem inicial enviada'],
+  ['aguardando_resposta', 'Aguardando resposta', 'Acompanhar retorno'],
+  ['depoimento_recebido', 'Depoimento recebido', 'Pronto para avaliação'],
+  ['toque2_enviado', 'Avaliação Google', 'Aguardando confirmação'],
+  ['toque3_enviado', 'Instagram', 'Aguardando autorização'],
+  ['revisao_manual', 'Revisar agora', 'Precisa de uma pessoa'],
+  ['concluido', 'Concluídos', 'Fluxo finalizado'],
+];
+const aliases = { nao_iniciado: 'não_iniciado', 'toque_1_enviado': 'toque1_enviado', 'toque_2_enviado': 'toque2_enviado', 'toque_3_enviado': 'toque3_enviado', toque_1_enviado: 'toque1_enviado' };
 let contacts = [];
-document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"><style>body,input,button,select,textarea{font-family:Poppins,system-ui,sans-serif!important}</style>');
-document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="/dashboard.css"><style>body{background:#f4f6f2}.summary{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}.metric{min-width:0;border-radius:14px}.board{grid-auto-columns:310px;gap:16px}.column{background:#eaf0ea;border-radius:15px}.card{border:0;border-radius:12px;box-shadow:0 2px 6px #173c3a10}.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.pill{font-size:9px;padding:4px 6px;border-radius:999px}.card-operational{margin:11px 0 9px;padding:8px 0;border-top:1px solid #edf0eb;border-bottom:1px solid #edf0eb;display:grid;gap:4px;font-size:10px;color:#66817d}.card-foot{display:flex;justify-content:space-between;gap:4px;font-size:9px;color:#597b72}.demo-banner{grid-column:1/-1;padding:11px 14px;border-radius:10px;background:#fff3ec;color:#a44a31;font-size:12px;font-weight:700}@media(max-width:840px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.summary{grid-template-columns:1fr 1fr}.board{grid-auto-columns:86vw}}</style>');
-const fallbackContacts = [{ row: 'demo-1', client: 'Guilherme Mayer', pet: 'Parafina', phone: '5511999999999', company: 'Embarpet', destination: 'MIA', date: '2026-07-15', status: 'não_iniciado', contacted: false, notes: 'TCVIA · Processo 1871', demo: true }, { row: 'demo-2', client: 'Mariana Lopes', pet: 'Milo', phone: '5511988888888', company: 'Embartravel', destination: 'LIS', date: '2026-07-12', status: 'toque1_enviado', contacted: true, touch1At: '2026-07-18T12:00:00Z', demo: true }, { row: 'demo-3', client: 'Rafael Nunes', pet: 'Luna e Theo', phone: '5511977777777', company: 'Embarpet', destination: 'YYZ', date: '2026-07-10', status: 'depoimento_recebido', contacted: true, touch1At: '2026-07-16T12:00:00Z', replyAt: '2026-07-16T13:18:00Z', testimonial: 'Levar a Luna e o Theo foi essencial para a nossa família começar essa nova fase unida.', demo: true }, { row: 'demo-4', client: 'Carolina Freitas', pet: 'Zig', phone: '5511966666666', company: 'Embartravel', destination: 'MAD', date: '2026-07-09', status: 'toque2_enviado', contacted: true, demo: true }, { row: 'demo-5', client: 'Fernanda Costa', pet: 'Nina', phone: '5511955555555', company: 'Embarpet', destination: 'MIA', date: '2026-07-07', status: 'toque3_enviado', contacted: true, demo: true }, { row: 'demo-6', client: 'André Martins', pet: 'Bento', phone: '', company: 'Embarpet', destination: 'LON', date: '2026-07-08', status: 'revisao_manual', contacted: false, notes: 'Confirmar telefone antes do contato.', demo: true }, { row: 'demo-7', client: 'Isadora Badim', pet: 'Carmela', phone: '5511944444444', company: 'Embarpet', destination: 'LIM', date: '2026-07-01', status: 'concluido', contacted: true, demo: true }];
-const board = document.querySelector('#board'), summary = document.querySelector('#summary'), dialog = document.querySelector('#detail'), detail = document.querySelector('#detail-content');
-document.querySelector('header .actions').insertAdjacentHTML('afterbegin', '<a class="back" href="/crm">CRM</a><a class="back" href="/mensagens">Mensagens</a><a class="back" href="/embarques/novo">Novo embarque</a>');
-const stageName = status => stages.find(([id]) => id === status)?.[1] || status || 'Prontos para contato';
-const formatDate = value => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: value.includes?.('T') ? 'short' : undefined }).format(new Date(value)) : '—';
-function initialContact(contact) { if (!contact.phone) return ['Pendente', 'Telefone ausente', 'risk']; if (!contact.contacted) return ['Pendente', 'Contato inicial não enviado', 'risk']; if (contact.replyAt) return ['Respondido', `Resposta em ${formatDate(contact.replyAt)}`, 'good']; return ['Enviado', contact.touch1At ? `Enviado em ${formatDate(contact.touch1At)}` : 'Contato inicial realizado', 'good']; }
-function nextAction(contact) { const mapping = { 'não_iniciado': 'Enviar contato inicial', 'toque1_enviado': 'Aguardar depoimento', 'aguardando_resposta': contact.reminderAttempts ? 'Aguardar resposta final' : 'Enviar lembrete no prazo', 'depoimento_recebido': 'Enviar pedido de avaliação', 'toque2_enviado': 'Aguardar confirmação Google', 'toque3_enviado': 'Aguardar autorização Instagram', 'revisao_manual': 'Revisar resposta manualmente', 'concluido': 'Nenhuma ação pendente' }; return mapping[contact.status] || 'Revisar caso'; }
-function card(contact) { const [contactStatus, contactDetail, signal] = initialContact(contact); const element = document.createElement('article'); element.className = 'card'; element.draggable = !contact.demo; element.dataset.id = contact.row; element.innerHTML = `<div class="card-top"><h3>${contact.client || 'Sem nome'}</h3><span class="pill ${signal}">${contactStatus}</span></div><p>${contact.pet || 'Pet não informado'} · ${contact.company || 'Empresa não informada'}</p><p>${contact.destination || 'Destino não informado'} · ${contact.date || 'Data não informada'}</p><div class="card-operational"><span>Contato: ${contactDetail}</span><span>Próxima ação: ${nextAction(contact)}</span></div><div class="card-foot"><span>${contact.folderUrl ? 'Drive organizado' : 'Pasta Drive pendente'}</span><span>${contact.phone ? 'WhatsApp disponível' : 'Dados pendentes'}</span></div>`; element.onclick = () => openDetail(contact); element.ondragstart = () => element.classList.add('dragging'); element.ondragend = () => element.classList.remove('dragging'); return element; }
-function render() { const query = document.querySelector('#search').value.toLowerCase(), onlyUncontacted = document.querySelector('#uncontacted').checked; const filtered = contacts.filter(contact => `${contact.client} ${contact.pet}`.toLowerCase().includes(query) && (!onlyUncontacted || !contact.contacted)); const missing = contacts.filter(contact => !contact.contacted); const actionable = contacts.filter(contact => !['concluido', 'sem_resposta'].includes(contact.status)).length; const coverage = contacts.length ? Math.round(((contacts.length - missing.length) / contacts.length) * 100) : 0; const demo = contacts.some(contact => contact.demo); summary.innerHTML = `${demo ? '<div class="demo-banner">Modo demonstração: conecte a planilha para ver os seus embarques reais.</div>' : ''}<div class="metric"><b>${coverage}%</b><span>cobertura de contato inicial</span></div><div class="metric"><b>${missing.length}</b><span>contatos iniciais pendentes</span></div><div class="metric"><b>${actionable}</b><span>casos em andamento</span></div><div class="metric"><b>${contacts.filter(contact => contact.status === 'revisao_manual' || !contact.phone).length}</b><span>pendências a resolver</span></div>`; board.innerHTML = ''; stages.forEach(([status, label]) => { const list = filtered.filter(contact => (contact.status || 'não_iniciado') === status); const column = document.createElement('section'); column.className = 'column'; column.innerHTML = `<div class="column-head"><span>${label}</span><span class="count">${list.length}</span></div><div class="cards"></div>`; const target = column.querySelector('.cards'); target.ondragover = event => event.preventDefault(); target.ondrop = async event => { event.preventDefault(); const dragged = document.querySelector('.dragging'); if (dragged) await move(dragged.dataset.id, status); }; list.forEach(contact => target.append(card(contact))); board.append(column); }); }
-async function move(row, status) { const response = await fetch(`/api/contacts/${row}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status }) }); if (!response.ok) return alert('A movimentação funciona depois de conectar a planilha.'); contacts.find(contact => contact.row == row).status = status; render(); }
-function timeline(contact) { const events = [['Contato inicial', contact.touch1At], ['Resposta do tutor', contact.replyAt], ['Pedido de avaliação', contact.touch2At]]; return events.filter(([, value]) => value).map(([label, value]) => `<li><b>${label}</b><span>${formatDate(value)}</span></li>`).join('') || '<li><b>Nenhuma atividade registrada</b><span>O primeiro contato ainda não foi enviado.</span></li>'; }
-function openDetail(contact) { const [contactStatus, contactDetail, signal] = initialContact(contact); const demoMessage = contact.demo ? '<p class="demo-detail">Este é um card demonstrativo. Configure a planilha para usar seus dados reais.</p>' : ''; detail.innerHTML = `<p class="eyebrow">${stageName(contact.status)}</p><h2>${contact.client || 'Sem nome'}</h2><section class="operation-grid"><div><b>Contato inicial</b><span class="pill ${signal}">${contactStatus}</span><small>${contactDetail}</small></div><div><b>Próxima ação</b><strong>${nextAction(contact)}</strong><small>${contact.reminderAttempts ? `Lembrete: ${contact.reminderAttempts}/1` : 'Sem lembrete enviado'}</small></div><div><b>Dados do cliente</b><strong>${contact.phone ? 'WhatsApp válido' : 'Telefone pendente'}</strong><small>${contact.phone || 'Preencha para liberar contato'}</small></div><div><b>Arquivos</b><strong>${contact.folderUrl ? 'Pasta criada' : 'Pasta pendente'}</strong><small>${contact.folderUrl ? 'Drive vinculado ao caso' : 'Será criada no primeiro upload'}</small></div></section><h3 class="detail-title">Linha do tempo</h3><ul class="timeline">${timeline(contact)}</ul><h3 class="detail-title">Dados do caso</h3>${[['Pet', contact.pet], ['Empresa', contact.company], ['Embarque', contact.date], ['Destino', contact.destination], ['Observações', contact.notes], ['Depoimento', contact.testimonial]].filter(([, value]) => value).map(([label, value]) => `<div class="detail-row"><b>${label}</b>${value}</div>`).join('')}${demoMessage}${contact.folderUrl ? `<a class="drive-link" target="_blank" href="${contact.folderUrl}">Abrir pasta no Drive ↗</a>` : ''}${contact.demo ? '' : '<form class="upload" id="upload"><b>Fotos e vídeos do caso</b><input type="file" name="file" accept="image/*,video/*" required><button>Enviar ao Drive</button><div class="status"></div></form><div class="detail-actions"><button id="send">Enviar próxima mensagem</button><button id="manual">Mover para revisão</button></div>'}`; if (!contact.demo) { detail.querySelector('#manual').onclick = () => { move(contact.row, 'revisao_manual'); dialog.close(); }; detail.querySelector('#send').onclick = async () => { const response = await fetch(`/api/contacts/${contact.row}/send`, { method: 'POST' }); if (response.ok) { alert('Mensagem enviada.'); await load(); } else alert('Não foi possível enviar. Confira a Evolution API.'); }; detail.querySelector('#upload').onsubmit = async event => { event.preventDefault(); const state = event.currentTarget.querySelector('.status'); state.textContent = 'Enviando...'; const response = await fetch(`/api/contacts/${contact.row}/upload`, { method: 'POST', body: new FormData(event.currentTarget) }); state.textContent = response.ok ? 'Arquivo enviado ao Drive.' : `Erro: ${await response.text()}`; if (response.ok) await load(); }; } dialog.showModal(); }
-async function load() { try { const response = await fetch('/api/contacts'); const payload = await response.json(); contacts = Array.isArray(payload) ? payload : fallbackContacts; } catch { contacts = fallbackContacts; } render(); }
-document.querySelector('#refresh').onclick = load; document.querySelector('#search').oninput = render; document.querySelector('#uncontacted').onchange = render; dialog.querySelector('.close').onclick = () => dialog.close(); load();
+const board = document.querySelector('#board');
+const summary = document.querySelector('#summary');
+const dialog = document.querySelector('#detail');
+const detail = document.querySelector('#detail-content');
+const fmt = value => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: String(value).includes('T') ? 'short' : undefined }).format(new Date(value)) : '—';
+const statusOf = contact => aliases[contact.status] || contact.status || 'não_iniciado';
+const stage = contact => stages.find(([id]) => id === statusOf(contact)) || stages[0];
+const esc = text => String(text || '—').replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+
+function contactSignal(contact) {
+  if (!contact.phone) return ['Dados pendentes', 'Telefone ausente', 'risk'];
+  if (!contact.contacted) return ['Pendente', 'Contato inicial não enviado', 'risk'];
+  if (contact.replyAt) return ['Respondido', `Resposta em ${fmt(contact.replyAt)}`, 'good'];
+  return ['Enviado', contact.touch1At ? `Enviado em ${fmt(contact.touch1At)}` : 'Contato inicial realizado', 'good'];
+}
+function nextAction(contact) {
+  if (contact.nextActionLabel) return contact.nextActionLabel;
+  return { 'não_iniciado': 'Enviar contato inicial', toque1_enviado: 'Acompanhar resposta', aguardando_resposta: 'Conferir retorno do tutor', depoimento_recebido: 'Enviar pedido de avaliação', toque2_enviado: 'Aguardar avaliação', toque3_enviado: 'Aguardar autorização', revisao_manual: 'Ler e responder manualmente', concluido: 'Nenhuma ação pendente' }[statusOf(contact)] || 'Revisar caso';
+}
+function renderSummary() {
+  const pending = contacts.filter(c => !c.contacted);
+  const active = contacts.filter(c => statusOf(c) !== 'concluido');
+  const review = contacts.filter(c => statusOf(c) === 'revisao_manual' || !c.phone);
+  const coverage = contacts.length ? Math.round((1 - pending.length / contacts.length) * 100) : 0;
+  summary.innerHTML = [[`${coverage}%`, 'contato inicial realizado'], [pending.length, 'ainda precisam de contato'], [active.length, 'embarques em acompanhamento'], [review.length, 'pendências para revisar']].map(([number, label], index) => `<article class="metric metric-${index}"><strong>${number}</strong><span>${label}</span></article>`).join('');
+}
+function card(contact) {
+  const [signal, signalText, signalKind] = contactSignal(contact);
+  const item = document.createElement('article');
+  item.className = 'card'; item.draggable = true; item.dataset.id = contact.row;
+  item.innerHTML = `<div class="card-top"><span class="card-company">${esc(contact.company || 'Embarpet')}</span><span class="pill ${signalKind}">${esc(signal)}</span></div><h3>${esc(contact.client || 'Sem nome')}</h3><p class="pet">🐾 ${esc(contact.pet || 'Pet não informado')}</p><div class="route"><span>${esc(contact.destination || 'Destino pendente')}</span><span>${contact.date ? fmt(contact.date) : 'Data pendente'}</span></div><div class="card-status"><b>${esc(signalText)}</b><span>${esc(nextAction(contact))}</span></div><footer><span>${contact.folderUrl ? 'Drive vinculado' : 'Sem arquivos'}</span><span>${contact.phone ? 'WhatsApp OK' : 'Telefone pendente'}</span></footer>`;
+  item.onclick = () => openDetail(contact);
+  item.ondragstart = () => item.classList.add('dragging');
+  item.ondragend = () => item.classList.remove('dragging');
+  return item;
+}
+function render() {
+  const query = document.querySelector('#search').value.trim().toLowerCase();
+  const onlyPending = document.querySelector('#uncontacted').checked;
+  const filtered = contacts.filter(c => `${c.client} ${c.pet} ${c.destination}`.toLowerCase().includes(query) && (!onlyPending || !c.contacted));
+  renderSummary(); board.innerHTML = '';
+  stages.forEach(([id, label, hint]) => {
+    const list = filtered.filter(c => statusOf(c) === id);
+    const column = document.createElement('section'); column.className = 'column';
+    column.innerHTML = `<header class="column-head"><div><b>${label}</b><small>${hint}</small></div><span class="count">${list.length}</span></header><div class="cards"></div>`;
+    const target = column.querySelector('.cards'); target.ondragover = event => event.preventDefault(); target.ondrop = event => { event.preventDefault(); const dragged = document.querySelector('.dragging'); if (dragged) move(dragged.dataset.id, id); };
+    list.forEach(c => target.append(card(c))); board.append(column);
+  });
+}
+async function move(row, status) {
+  const response = await fetch(`/api/contacts/${row}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status }) });
+  if (!response.ok) return alert('Não foi possível salvar a etapa na planilha.');
+  contacts.find(c => String(c.row) === String(row)).status = status; render();
+}
+function openDetail(contact) {
+  const [signal, signalText, signalKind] = contactSignal(contact);
+  detail.innerHTML = `<p class="eyebrow">${esc(stage(contact)[1])}</p><h2>${esc(contact.client)}</h2><p class="detail-subtitle">🐾 ${esc(contact.pet)} · ${esc(contact.company)}</p><section class="operation-grid"><div><b>Contato inicial</b><span class="pill ${signalKind}">${esc(signal)}</span><small>${esc(signalText)}</small></div><div><b>Próxima ação</b><strong>${esc(nextAction(contact))}</strong><small>${contact.reminderAttempts ? `${contact.reminderAttempts} lembrete(s) enviado(s)` : 'Nenhum lembrete enviado'}</small></div><div><b>WhatsApp</b><strong>${contact.phone ? 'Disponível' : 'Pendente'}</strong><small>${esc(contact.phone || 'Preencha o telefone do tutor')}</small></div><div><b>Arquivos</b><strong>${contact.folderUrl ? 'Pasta vinculada' : 'Sem pasta'}</strong><small>${contact.folderUrl ? 'Fotos e vídeos organizados' : 'Crie ao enviar o primeiro arquivo'}</small></div></section><section class="detail-list"><h3>Dados do embarque</h3>${[['Destino', contact.destination], ['Data', contact.date && fmt(contact.date)], ['Resumo', contact.notes], ['Depoimento', contact.testimonial]].filter(([, value]) => value).map(([label, value]) => `<p><b>${label}</b><span>${esc(value)}</span></p>`).join('')}</section>${contact.folderUrl ? `<a class="drive-link" href="${contact.folderUrl}" target="_blank">Abrir pasta no Drive ↗</a>` : ''}<div class="detail-actions"><button id="manual" class="secondary">Revisar manualmente</button></div>`;
+  detail.querySelector('#manual').onclick = () => { move(contact.row, 'revisao_manual'); dialog.close(); };
+  dialog.showModal();
+}
+async function load() {
+  document.querySelector('#refresh').disabled = true;
+  try { const response = await fetch('/api/contacts'); if (!response.ok) throw new Error(); const payload = await response.json(); contacts = Array.isArray(payload) ? payload : []; }
+  catch { contacts = []; }
+  document.querySelector('#updated-at').textContent = `Atualizado às ${new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' }).format(new Date())}`;
+  document.querySelector('#refresh').disabled = false; render();
+}
+document.querySelector('#refresh').onclick = load;
+document.querySelector('#search').oninput = render;
+document.querySelector('#uncontacted').onchange = render;
+dialog.querySelector('.close').onclick = () => dialog.close();
+load();
