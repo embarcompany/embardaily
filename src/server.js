@@ -37,9 +37,9 @@ http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   if (isDashboardRequest(url) && !authorized(req)) { res.writeHead(401, { "www-authenticate": 'Basic realm="EmbarDaily CRM"' }); return res.end("Autenticação necessária"); }
   if (req.method === "GET" && url.pathname === "/health") return res.end(JSON.stringify({ ok: true }));
-  if (req.method === "GET" && url.pathname === "/") return staticFile(res, "index.html", "text/html; charset=utf-8");
+  if (req.method === "GET" && ["/", "/crm"].includes(url.pathname)) return staticFile(res, "index.html", "text/html; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/app.js") return staticFile(res, "app.js", "text/javascript; charset=utf-8");
-  if (req.method === "GET" && url.pathname === "/novo-embarque") return staticFile(res, "novo-embarque.html", "text/html; charset=utf-8");
+  if (req.method === "GET" && ["/novo-embarque", "/embarques/novo"].includes(url.pathname)) return staticFile(res, "novo-embarque.html", "text/html; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/novo-embarque.js") return staticFile(res, "novo-embarque.js", "text/javascript; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/form.css") return staticFile(res, "form.css", "text/css; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/app.css") return staticFile(res, "app.css", "text/css; charset=utf-8");

@@ -1,4 +1,5 @@
 document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"><style>body,input,button,select,textarea{font-family:Poppins,system-ui,sans-serif!important}</style>');
+document.querySelectorAll('a[href="/"]').forEach(link => { link.href = '/crm'; });
 const form = document.querySelector('#shipment-form'), status = document.querySelector('#status'), pets = document.querySelector('#pets');
 let current = 1;
 function petRow() { const row = document.createElement('div'); row.className = 'pet-row'; row.innerHTML = '<input name="petName" placeholder="Nome do pet" required><input name="petBreed" placeholder="Espécie / raça"><button type="button" class="remove">Remover</button>'; row.querySelector('.remove').onclick = () => row.remove(); return row; }
