@@ -40,8 +40,11 @@ http.createServer(async (req, res) => {
   if (req.method === "GET" && ["/", "/crm"].includes(url.pathname)) return staticFile(res, "index.html", "text/html; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/app.js") return staticFile(res, "app.js", "text/javascript; charset=utf-8");
   if (req.method === "GET" && ["/novo-embarque", "/embarques/novo"].includes(url.pathname)) return staticFile(res, "novo-embarque.html", "text/html; charset=utf-8");
+  if (req.method === "GET" && url.pathname === "/mensagens") return staticFile(res, "mensagens.html", "text/html; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/novo-embarque.js") return staticFile(res, "novo-embarque.js", "text/javascript; charset=utf-8");
+  if (req.method === "GET" && url.pathname === "/mensagens.js") return staticFile(res, "mensagens.js", "text/javascript; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/form.css") return staticFile(res, "form.css", "text/css; charset=utf-8");
+  if (req.method === "GET" && url.pathname === "/mensagens.css") return staticFile(res, "mensagens.css", "text/css; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/app.css") return staticFile(res, "app.css", "text/css; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/dashboard.css") return staticFile(res, "dashboard.css", "text/css; charset=utf-8");
   if (req.method === "GET" && url.pathname === "/fonts.css") return staticFile(res, "fonts.css", "text/css; charset=utf-8");
